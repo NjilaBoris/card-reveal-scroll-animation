@@ -1,65 +1,141 @@
+"use client";
+import { useEffect } from "react";
+import Link from "next/link";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { ReactLenis } from "lenis/react";
 import Image from "next/image";
 
+gsap.registerPlugin(ScrollTrigger);
+
 export default function Home() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+  useEffect(() => {
+    const scrollTriggerSettings = {
+      trigger: ".main",
+      start: "top 25%",
+      toggleActions: "play reverse play reverse",
+    };
+
+    const leftXValues = [-800, -900, -400];
+    const rightXValues = [800, 900, 400];
+    const leftRotationValues = [-30, -20, -35];
+    const rightRotationValues = [30, 20, 35];
+    const yValues = [100, -150, -400];
+
+    gsap.utils.toArray(".row").forEach((row, index) => {
+      const cardLeft = row.querySelector(".card-left");
+      const cardRight = row.querySelector(".card-right");
+
+      gsap.to(cardLeft, {
+        x: leftXValues[index],
+        scrollTrigger: {
+          trigger: ".main",
+          start: "top center",
+          end: "150% bottom",
+          scrub: true,
+          onUpdate: (self) => {
+            const progress = self.progress;
+            cardLeft.style.transform = `translateX(${
+              progress * leftXValues[index]
+            }px) translateY(${progress * yValues[index]}px) rotate(${
+              progress * leftRotationValues[index]
+            }deg)`;
+            cardRight.style.transform = `translateX(${
+              progress * rightXValues[index]
+            }px) translateY(${progress * yValues[index]}px) rotate(${
+              progress * rightRotationValues[index]
+            }deg)`;
+          },
+        },
+      });
+    });
+
+    gsap.to(".logo", {
+      scale: 1,
+      duration: 0.5,
+      ease: "power1.out",
+      scrollTrigger: scrollTriggerSettings,
+    });
+
+    gsap.to(".line p", {
+      y: 0,
+      duration: 0.5,
+      ease: "power1.out",
+      stagger: 0.1,
+      scrollTrigger: scrollTriggerSettings,
+    });
+
+    gsap.to("button", {
+      y: 0,
+      opacity: 1,
+      duration: 0.5,
+      ease: "power1.out",
+      delay: 0.25,
+      scrollTrigger: scrollTriggerSettings,
+    });
+
+    return () => {
+      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+    };
+  }, []);
+
+  const generateRows = () => {
+    const rows = [];
+    for (let i = 1; i <= 3; i++) {
+      rows.push(
+        <div className="row" key={i}>
+          <div className="card card-left">
             <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+              src={`/img-${2 * i - 1}.jpg`}
+              alt=""
+              width={100}
+              height={100}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </div>
+          <div className="card card-right">
+            <Image src={`/img-${2 * i}.jpg`} alt="" width={100} height={100} />
+          </div>
         </div>
-      </main>
-    </div>
+      );
+    }
+    return rows;
+  };
+
+  return (
+    <ReactLenis root>
+      <section className="hero">
+        <div className="img">
+          <Image src="/pro-logo.png" alt="" width={100} height={100} />
+        </div>
+      </section>
+
+      <section className="main">
+        <div className="main-content">
+          <div className="logo">
+            <Image src="/logo.jpg" alt="" width={100} height={100} />
+          </div>
+          <div className="copy">
+            <div className="line">
+              <p>Delve into coding without clutter.</p>
+            </div>
+            <div className="line">
+              <p>One subscription. Endless web design.</p>
+            </div>
+            <div className="line">
+              <p>Take the fast lane to mastery.</p>
+            </div>
+          </div>
+          <div className="btn">
+            <button>Get PRO</button>
+          </div>
+        </div>
+
+        {generateRows()}
+      </section>
+
+      <section className="footer">
+        <Link href="youtube.com">Link in description</Link>
+      </section>
+    </ReactLenis>
   );
 }
